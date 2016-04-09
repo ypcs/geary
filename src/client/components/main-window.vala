@@ -187,6 +187,22 @@ public class MainWindow : Gtk.ApplicationWindow {
             .geary-titlebar-left:dir(rtl) {
                 border-top-left-radius: 0px;
             }
+
+            #conversation_listbox {
+                padding: 18px 18px 0;
+            }
+            #conversation_listbox > row {
+                margin: 0;
+                border-width: 1px 1px 0;
+                padding: 0;
+                box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
+                transition: margin 0.1s;
+            }
+            #conversation_listbox > row.show-message {
+                margin-bottom: 18px;
+                border-bottom-width: 1px;
+            }
+
             #ConversationMessage {
                padding: 12px;
             }
@@ -236,7 +252,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         folder_frame.add(folder_list_scrolled);
         folder_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
         folder_box.pack_start(folder_frame, true, true);
-        
+
         // message list
         conversation_list_scrolled = new Gtk.ScrolledWindow(null, null);
         conversation_list_scrolled.set_size_request(MESSAGE_LIST_WIDTH, -1);
@@ -256,11 +272,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         status_bar.add(spinner);
         
         folder_paned.get_style_context().add_class("sidebar-pane-separator");
-        
-        Gtk.Frame viewer_frame = new Gtk.Frame(null);
-        viewer_frame.shadow_type = Gtk.ShadowType.NONE;
-        viewer_frame.add(conversation_viewer);
-        
+
         // Folder list to the left of everything.
         folder_paned.pack1(folder_box, false, false);
         folder_paned.pack2(conversation_box, true, false);
@@ -272,7 +284,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         
         // Message list left of message viewer.
         conversations_paned.pack1(search_bar_box, false, false);
-        conversations_paned.pack2(viewer_frame, true, true);
+        conversations_paned.pack2(conversation_viewer, true, true);
         
         if (GearyApplication.instance.is_running_unity)
             main_layout.pack_start(main_toolbar, false, true, 0);
