@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2016 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 public class MainWindow : Gtk.ApplicationWindow {
@@ -184,6 +186,15 @@ public class MainWindow : Gtk.ApplicationWindow {
             .geary-titlebar-right:dir(ltr),
             .geary-titlebar-left:dir(rtl) {
                 border-top-left-radius: 0px;
+            }
+            #ConversationMessage {
+               padding: 12px;
+            }
+            #ConversationMessage .header-label {
+               margin-right: 6px;
+            }
+            #ConversationMessage separator {
+               margin: 12px 0;
             }
         """;
         

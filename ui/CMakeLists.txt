@@ -8,6 +8,8 @@ set(RESOURCE_LIST
   STRIPBLANKS "certificate_warning_dialog.glade"
   STRIPBLANKS "composer.glade"
   STRIPBLANKS "composer_accelerators.ui"
+  STRIPBLANKS "conversation-message.ui"
+  STRIPBLANKS "conversation-message-menu.ui"
   STRIPBLANKS "edit_alternate_emails.glade"
   STRIPBLANKS "find_bar.glade"
   STRIPBLANKS "login.glade"
