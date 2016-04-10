@@ -1159,7 +1159,7 @@ public class ComposerWidget : Gtk.EventBox {
             return;
         container.remove_composer();
         GearyApplication.instance.controller.main_window.conversation_viewer
-            .set_paned_composer(this);
+            .do_compose(this);
         state = ComposerWidget.ComposerState.PANED;
     }
     
