@@ -44,11 +44,6 @@ public class ConversationWebView : StylishWebView {
         scroll_event.connect(on_scroll_event);
     }
     
-    public override bool query_tooltip(int x, int y, bool keyboard_tooltip, Gtk.Tooltip tooltip) {
-        // Disable tooltips from within WebKit itself.
-        return false;
-    }
-    
     // Overridden to get the correct height from get_preferred_height.
     public new void get_preferred_size(out Gtk.Requisition minimum_size,
                                        out Gtk.Requisition natural_size) {
