@@ -8,53 +8,38 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     
     private const int MIN_EDITOR_HEIGHT = 200;
     
+    public Geary.Email referred;
+
     private ComposerWidget composer;
-    private ConversationViewer conversation_viewer;
-    private string embed_id;
+    private Gtk.ScrolledWindow outer_scroller;
     private bool setting_inner_scroll;
     private bool scrolled_to_bottom = false;
-    //private double inner_scroll_adj_value;
+    private double inner_scroll_adj_value;
     private int inner_view_height;
     private int min_height = MIN_EDITOR_HEIGHT;
     private bool has_accel_group = false;
-    
-    public Gtk.Window top_window {
+    private Gtk.Window top_window {
         get { return (Gtk.Window) get_toplevel(); }
     }
     
-    public ComposerEmbed(ComposerWidget composer, ConversationViewer conversation_viewer,
-        Geary.Email referred) {
+    public signal void loaded();
+    public signal void vanished();
+    
+    public ComposerEmbed(Geary.Email referred,
+                         ComposerWidget composer,
+                         Gtk.ScrolledWindow outer_scroller) {
+        this.referred = referred;
         this.composer = composer;
-        this.conversation_viewer = conversation_viewer;
+        this.outer_scroller = outer_scroller;
         halign = Gtk.Align.FILL;
         valign = Gtk.Align.FILL;
-        
-        WebKit.DOM.HTMLElement? email_element = null;
-        // email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
-        //     conversation_viewer.get_div_id(referred.id)) as WebKit.DOM.HTMLElement;
-        // embed_id = referred.id.to_string() + "_reply";
-        // if (email_element == null) {
-        //     warning("Embedded composer could not find email to follow.");
-        //     email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
-        //         "placeholder") as WebKit.DOM.HTMLElement;
-        // }
-        
-        try {
-            email_element.insert_adjacent_html("afterend",
-                @"<div id='$embed_id' class='composer_embed'></div>");
-        } catch (Error error) {
-            debug("Error creating embed element: %s", error.message);
-            return;
-        }
-        
+
         add(composer);
         realize.connect(on_realize);
         composer.editor.focus_in_event.connect(on_focus_in);
         composer.editor.focus_out_event.connect(on_focus_out);
         composer.editor.document_load_finished.connect(on_loaded);
-        conversation_viewer.compose_overlay.add_overlay(this);
         show();
-        present();
     }
     
     private void on_realize() {
@@ -78,7 +63,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         }
         Idle.add(() => {
             recalc_height();
-            conversation_viewer.compose_overlay.queue_resize();
+            loaded();
             return false;
         });
     }
@@ -193,12 +178,12 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     }
     
     private void on_inner_scroll(Gtk.Adjustment adj) {
-        //double delta = adj.value - inner_scroll_adj_value;
-        //inner_scroll_adj_value = adj.value;
-        //if (delta != 0 && !setting_inner_scroll) {
-        //    Gtk.Adjustment outer_adj = conversation_viewer.web_view.vadjustment;
-        //    outer_adj.set_value(outer_adj.value + delta);
-        //}
+        double delta = adj.value - inner_scroll_adj_value;
+        inner_scroll_adj_value = adj.value;
+        if (delta != 0 && !setting_inner_scroll) {
+            Gtk.Adjustment outer_adj = outer_scroller.vadjustment;
+            outer_adj.set_value(outer_adj.value + delta);
+        }
     }
     
     private void on_adjust_changed(Gtk.Adjustment adj) {
@@ -228,30 +213,21 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         if (view_height != inner_view_height || min_height != base_height + MIN_EDITOR_HEIGHT) {
             inner_view_height = view_height;
             min_height = base_height + MIN_EDITOR_HEIGHT;
+
             // Calculate height widget should be to avoid scrolling in editor
-            //int widget_height = int.max(view_height + base_height - 2, min_height); //? about 2
-            // WebKit.DOM.Element embed = conversation_viewer.web_view
-            //     .get_dom_document().get_element_by_id(embed_id);
-            // if (embed != null) {
-            //     try {
-            //         embed.style.set_property("height", @"$widget_height", "");
-            //     } catch (Error error) {
-            //         debug("Error setting height of composer widget");
-            //     }
-            // }
+            int widget_height = int.max(view_height + base_height - 2, min_height); //? about 2
+            set_size_request(-1, widget_height);
         }
         return false;
     }
     
     private bool on_inner_scroll_event(Gdk.EventScroll event) {
-        //conversation_viewer.web_view.scroll_event(event);
+        outer_scroller.scroll_event(event);
         return true;
     }
     
     public void present() {
         top_window.present();
-        // conversation_viewer.web_view.get_dom_document().get_element_by_id(embed_id)
-        //     .scroll_into_view_if_needed(false);
     }
     
     public unowned Gtk.Widget get_focus() {
@@ -263,19 +239,12 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         composer.state = ComposerWidget.ComposerState.DETACHED;
         composer.editor.focus_in_event.disconnect(on_focus_in);
         composer.editor.focus_out_event.disconnect(on_focus_out);
-        
-        // WebKit.DOM.Element embed = conversation_viewer.web_view.get_dom_document().get_element_by_id(embed_id);
-        // try{
-        //     embed.parent_element.remove_child(embed);
-        // } catch (Error error) {
-        //     warning("Could not remove embed from WebView: %s", error.message);
-        // }
+        vanished();
     }
     
     public void close_container() {
         if (visible)
             vanish();
-        conversation_viewer.compose_overlay.remove(this);
     }
 }
 

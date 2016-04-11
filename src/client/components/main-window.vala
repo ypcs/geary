@@ -189,7 +189,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             }
 
             #conversation_listbox {
-                padding: 18px 18px 0;
+                padding: 18px 18px calc(18px/2);
             }
             #conversation_listbox > row {
                 margin: 0;
@@ -198,8 +198,9 @@ public class MainWindow : Gtk.ApplicationWindow {
                 box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
                 transition: margin 0.1s;
             }
-            #conversation_listbox > row.show-message {
-                margin-bottom: 18px;
+            #conversation_listbox > row.show-message,
+            #conversation_listbox > row.composer {
+                margin-bottom: calc(18px/2);
                 border-bottom-width: 1px;
             }
 
@@ -211,6 +212,10 @@ public class MainWindow : Gtk.ApplicationWindow {
             }
             #ConversationMessage separator {
                margin: 12px 0;
+            }
+
+            #composer_embed headerbar {
+               border-radius: 0px;
             }
         """;
         
