@@ -166,19 +166,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             .sidebar-pane-separator.vertical .conversation-frame {
                 border-left-width: 0px;
             }
-            ComposerBox {
-                border-left-width: 0px;
-                border-right-width: 0px;
-                border-bottom-width: 0px;
-            }
-            ComposerBox.full-pane {
-                border-top-width: 0px;
-            }
-            ComposerEmbed GtkHeaderBar,
-            ComposerBox GtkHeaderBar,
-            GtkBox.vertical GtkHeaderBar {
-                border-radius: 0px;
-            }
+
             .geary-titlebar-left:dir(ltr),
             .geary-titlebar-right:dir(rtl) {
                 border-top-right-radius: 0px;
