@@ -201,6 +201,10 @@ public class MainWindow : Gtk.ApplicationWindow {
             #ConversationMessage separator {
                margin: 12px 0;
             }
+            #ConversationMessage infobar {
+               border-radius: 2px;
+               margin-bottom: 12px;
+            }
 
             #composer_embed headerbar {
                border-radius: 0px;
