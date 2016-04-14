@@ -216,6 +216,14 @@ public class MainWindow : Gtk.ApplicationWindow {
             #composer_embed headerbar {
                border-radius: 0px;
             }
+
+            #user_message {
+                border: 1px solid @borders;
+                border-left: 0;
+                border-right: 0;
+                background: @theme_base_color;
+            }
+
         """;
         
         if(Gtk.MAJOR_VERSION > 3 || Gtk.MAJOR_VERSION == 3 && Gtk.MINOR_VERSION >= 14) {
