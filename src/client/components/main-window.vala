@@ -77,7 +77,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         GearyApplication.instance.controller.folder_selected.connect(on_folder_selected);
         Geary.Engine.instance.account_available.connect(on_account_available);
         Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
-        
+
         // Toolbar.
         main_toolbar = new MainToolbar();
         main_toolbar.bind_property("search-open", search_bar, "search-mode-enabled",
@@ -184,7 +184,7 @@ public class MainWindow : Gtk.ApplicationWindow {
                 border: 1px solid @borders;
                 border-bottom-width: 0;
                 padding: 0;
-                background: @theme_bg_color;
+                background: shade(@theme_base_color, 0.96);
                 box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
                 transition: margin 0.1s, background 0.15s;
             }
