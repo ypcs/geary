@@ -54,6 +54,12 @@ public class ConversationMessage : Gtk.Box {
     // The HTML viewer to view the emails.
     public ConversationWebView web_view { get; private set; }
 
+    // The allocation for the web view
+    public Gdk.Rectangle web_view_allocation { get; private set; }
+
+    // Has the message body been been fully loaded?
+    public bool is_loading_complete = false;
+
     [GtkChild]
     private Gtk.Image avatar_image;
 
@@ -180,8 +186,9 @@ public class ConversationMessage : Gtk.Box {
         // web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
         // web_view.realize.connect( () => { web_view.get_vadjustment().value_changed.connect(mark_read); });
         // web_view.size_allocate.connect(mark_read);
-        web_view.realize.connect(() => { debug("web_view: realised"); });
-        web_view.size_allocate.connect(() => { debug("web_view: allocated"); });
+        web_view.size_allocate.connect((widget, allocation) => {
+                web_view_allocation = allocation;
+            });
 
         body_box.set_has_tooltip(true);
         web_view.hovering_over_link.connect(on_hovering_over_link);
@@ -372,6 +379,10 @@ public class ConversationMessage : Gtk.Box {
         return menu;
     }
 
+    public bool is_manual_read() {
+        return get_style_context().has_class("geary_manual_read");
+    }
+
     public void update_flags(Geary.Email email) {
         Geary.EmailFlags flags = email.email_flags;
         Gtk.StyleContext style = get_style_context();
@@ -404,17 +415,35 @@ public class ConversationMessage : Gtk.Box {
 
     private void load_message_body() {
         bool remote_images = false;
+        bool load_images = false;
         string body_text = "";
         try {
-            body_text = message.get_body(Geary.RFC822.TextFormat.HTML, inline_image_replacer) ?? "";
+            body_text = message.get_body(
+                Geary.RFC822.TextFormat.HTML, inline_image_replacer
+            ) ?? "";
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
         }
 
         body_text = clean_html_markup(body_text, message, out remote_images);
+        if (remote_images) {
+            Geary.Contact contact =
+                containing_folder.account.get_contact_store().get_by_rfc822(
+                    email.get_primary_originator()
+                );
+            bool always_load = contact != null && contact.always_load_remote_images();
+            if (always_load || email.load_remote_images().is_certain()) {
+                load_images = true;
+            } else {
+                remote_images_infobar.show();
+            }
+        }
 
         web_view.notify["load-status"].connect((source, param) => {
                 if (web_view.load_status == WebKit.LoadStatus.FINISHED) {
+                    if (load_images) {
+                        show_images(false);
+                    }
                     WebKit.DOM.HTMLElement html = (
                         web_view.get_dom_document().document_element as
                         WebKit.DOM.HTMLElement
@@ -433,25 +462,15 @@ public class ConversationMessage : Gtk.Box {
                                (Callback) on_show_quote_clicked, this);
                     bind_event(web_view, ".quote_container > .hider", "click",
                                (Callback) on_hide_quote_clicked, this);
+
+                    // XXX Not actually true since remote images will
+                    // still be loading.
+                    is_loading_complete = true;
                 }
             });
-        web_view.load_string(body_text, "text/html", "UTF8", "");
 
-        if (remote_images) {
-            Geary.Contact contact = containing_folder.account.get_contact_store().get_by_rfc822(
-                email.get_primary_originator());
-            bool always_load = contact != null && contact.always_load_remote_images();
-            
-            if (always_load || email.load_remote_images().is_certain()) {
-                web_view.notify["load-status"].connect((source, param) => {
-                        if (web_view.load_status == WebKit.LoadStatus.FINISHED) {
-                            show_images(false);
-                        }
-                    });
-            } else {
-                remote_images_infobar.show();
-            }
-        }
+        // Only load it after we've hooked up the load-status signal above
+        web_view.load_string(body_text, "text/html", "UTF8", "");
     }
     
     // This delegate is called from within Geary.RFC822.Message.get_body while assembling the plain
