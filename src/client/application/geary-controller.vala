@@ -223,8 +223,6 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.mark_messages.connect(on_conversation_viewer_mark_messages);
         main_window.conversation_viewer.save_attachments.connect(on_save_attachments);
         main_window.conversation_viewer.save_buffer_to_file.connect(on_save_buffer_to_file);
-        main_window.conversation_viewer.edit_draft.connect(on_edit_draft);
-        
         new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
         main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
         
@@ -292,8 +290,6 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.mark_messages.disconnect(on_conversation_viewer_mark_messages);
         main_window.conversation_viewer.save_attachments.disconnect(on_save_attachments);
         main_window.conversation_viewer.save_buffer_to_file.disconnect(on_save_buffer_to_file);
-        main_window.conversation_viewer.edit_draft.disconnect(on_edit_draft);
-        
         // hide window while shutting down, as this can take a few seconds under certain conditions
         main_window.hide();
         
@@ -1528,10 +1524,6 @@ public class GearyController : Geary.BaseObject {
         on_edit_draft(activated.get_latest_recv_email(Geary.App.Conversation.Location.IN_FOLDER));
     }
     
-    private void on_edit_draft(Geary.Email draft) {
-        create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true);
-    }
-    
     private void on_special_folder_type_changed(Geary.Folder folder, Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type) {
         main_window.folder_list.remove_folder(folder);
@@ -2662,11 +2654,13 @@ public class GearyController : Geary.BaseObject {
     private void on_message_added(ConversationMessage message) {
         message.link_activated.connect(on_link_activated);
         message.attachment_activated.connect(on_attachment_activated);
+        message.edit_draft.connect(on_edit_draft);
     }
 
     private void on_message_removed(ConversationMessage message) {
         message.link_activated.disconnect(on_link_activated);
         message.attachment_activated.disconnect(on_attachment_activated);
+        message.edit_draft.disconnect(on_edit_draft);
     }
 
     private void on_link_activated(string link) {
@@ -2675,6 +2669,10 @@ public class GearyController : Geary.BaseObject {
         } else {
             open_uri(link);
         }
+    }
+
+    private void on_edit_draft(Geary.Email draft) {
+        create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true);
     }
 
     // Disables all single-message buttons and enables all multi-message buttons.
