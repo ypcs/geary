@@ -205,8 +205,6 @@ public class ConversationMessage : Gtk.Box {
         body_box.set_has_tooltip(true); // Used to show link URLs
         body_box.pack_start(web_view, true, true, 0);
 
-        load_message_body();
-
         // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
         //  // XXX set a RO property?
         //  get_style_context().add_class("sent");
@@ -243,6 +241,7 @@ public class ConversationMessage : Gtk.Box {
     }
 
     public async void start_loading(Cancellable load_cancelled) {
+        yield load_message_body(load_cancelled);
         yield load_attachments(email.attachments, load_cancelled);
     }
 
@@ -423,7 +422,7 @@ public class ConversationMessage : Gtk.Box {
         //            Geary.SpecialFolderType.SENT.get_display_name()));
     }
 
-    private void load_message_body() {
+    private async void load_message_body(Cancellable load_cancelled) {
         bool remote_images = false;
         bool load_images = false;
         string body_text = "";
@@ -447,6 +446,7 @@ public class ConversationMessage : Gtk.Box {
             }
         }
 
+        load_cancelled.cancelled.connect(() => { web_view.stop_loading(); });
         web_view.notify["load-status"].connect((source, param) => {
                 if (web_view.load_status == WebKit.LoadStatus.FINISHED) {
                     if (load_images) {
@@ -477,10 +477,10 @@ public class ConversationMessage : Gtk.Box {
                 }
             });
 
-        // Only load it after we've hooked up the load-status signal above
+        // Only load it after we've hooked up the signals above
         web_view.load_string(body_text, "text/html", "UTF8", "");
     }
-    
+
     // This delegate is called from within Geary.RFC822.Message.get_body while assembling the plain
     // or HTML document when a non-text MIME part is encountered within a multipart/mixed container.
     // If this returns null, the MIME part is dropped from the final returned document; otherwise,
