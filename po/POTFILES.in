@@ -383,6 +383,7 @@ src/mailer/main.vala
 [type: gettext/glade]ui/certificate_warning_dialog.glade
 [type: gettext/glade]ui/composer_accelerators.ui
 [type: gettext/glade]ui/composer.glade
+[type: gettext/glade]ui/conversation-email.ui
 [type: gettext/glade]ui/conversation-message.ui
 [type: gettext/glade]ui/conversation-message-menu.ui
 [type: gettext/glade]ui/conversation-viewer.ui
