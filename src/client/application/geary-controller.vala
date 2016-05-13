@@ -241,7 +241,6 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.email_row_added.connect(on_email_row_added);
         main_window.conversation_viewer.email_row_removed.connect(on_email_row_removed);
         main_window.conversation_viewer.mark_emails.connect(on_conversation_viewer_mark_emails);
-        main_window.conversation_viewer.save_buffer_to_file.connect(on_save_buffer_to_file);
         new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
         main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
         
@@ -304,7 +303,7 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.email_row_added.disconnect(on_email_row_added);
         main_window.conversation_viewer.email_row_removed.disconnect(on_email_row_removed);
         main_window.conversation_viewer.mark_emails.disconnect(on_conversation_viewer_mark_emails);
-        main_window.conversation_viewer.save_buffer_to_file.disconnect(on_save_buffer_to_file);
+
         // hide window while shutting down, as this can take a few seconds under certain conditions
         main_window.hide();
         
@@ -2705,6 +2704,7 @@ public class GearyController : Geary.BaseObject {
         message.save_attachments.connect(on_save_attachments);
         message.edit_draft.connect(on_edit_draft);
         message.view_source.connect(on_view_source);
+        message.save_image.connect(on_save_buffer_to_file);
     }
 
     private void on_email_row_removed(ConversationEmail message) {
@@ -2716,6 +2716,7 @@ public class GearyController : Geary.BaseObject {
         message.save_attachments.disconnect(on_save_attachments);
         message.edit_draft.disconnect(on_edit_draft);
         message.view_source.disconnect(on_view_source);
+        message.save_image.disconnect(on_save_buffer_to_file);
     }
 
     private void on_link_activated(string link) {
